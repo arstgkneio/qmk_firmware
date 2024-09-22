@@ -1,1 +1,1 @@
-DEFAULT_FOLDER = redox/rev1/base
+BACKLIGHT_ENABLE = no
