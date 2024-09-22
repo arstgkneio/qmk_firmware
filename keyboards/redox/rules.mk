@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MCU name
 #MCU = at90usb1286
 MCU = atmega32u4
@@ -72,3 +73,10 @@ RGBLIGHT_ENABLE = yes       # Enable WS2812 RGB underlight.
 SPLIT_KEYBOARD = yes
 
 DEFAULT_FOLDER = redox/rev1
+=======
+DEFAULT_FOLDER = redox/rev1/base
+
+# Disable unsupported hardware
+AUDIO_SUPPORTED = no
+BACKLIGHT_SUPPORTED = no
+>>>>>>> upstream/master
