@@ -20,7 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Use I2C or Serial, not both */
 #define USE_SERIAL
 
-#define EE_HANDS
+// Allow the firmware to determine keyboard handedness based on EEPROM settings.
+#define EE_HANDS 
 
 #undef RGBLIGHT_LED_COUNT
 #define RGBLIGHT_EFFECT_BREATHING
