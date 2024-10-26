@@ -5,3 +5,5 @@ AUDIO_SUPPORTED = no
 BACKLIGHT_SUPPORTED = no
 
 BOOTLOADER = qmk-dfu
+
+SRC += key_exclusion.c
