@@ -2,6 +2,10 @@
 {
     // Unofficially, QMK uses spaces for indentation
     "editor.insertSpaces": true,
+
+    // Use QMK MSYS only in this workspace
+    "terminal.integrated.defaultProfile.windows": "QMK_MSYS",
+
     // Configure glob patterns for excluding files and folders.
     "files.exclude": {
         "**/.build": true,

@@ -1,0 +1,28 @@
+
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Redox Firmware",
+            "type": "process",
+            "command": "C:\\QMK_MSYS\\usr\\bin\\bash.exe",
+            "args": [
+                "--login",
+                "-c",
+                "qmk compile -kb redox/rev1/base -km arstgkneio"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "MSYSTEM": "MINGW64",
+                    "CHERE_INVOKING": "1"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
