@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "key_exclusion.h"
 
 enum custom_keycodes {
-    KXTG = SAFE_RANGE, // Key exclusion toggle hotkey
+    KXTG = SAFE_RANGE,  // Key exclusion toggle hotkey
+    BOOT_2S,           // Hold for 2 seconds, then release to enter bootloader
 };
 
 enum layers {
@@ -29,7 +30,28 @@ enum layers {
 };
 
 
+// Releasing BOOT_2S before the threshold does nothing.
+// Enter bootloader only after a deliberate two-second hold and release.
+#define BOOT_2S_MS 2000
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    static uint16_t boot_hold_timer;
+    static bool     boot_hold_pressed = false;
+
+    if (keycode == BOOT_2S) {
+        if (record->event.pressed) {
+            boot_hold_pressed = true;
+            boot_hold_timer   = timer_read();
+        } else {
+            bool should_boot = boot_hold_pressed && timer_elapsed(boot_hold_timer) >= BOOT_2S_MS;
+            boot_hold_pressed = false;
+            if (should_boot) {
+                reset_keyboard();
+            }
+        }
+        return false;  // Never send BOOT_2S as a normal keycode
+    }
+
     if (keycode == KXTG) {
         if (record->event.pressed) {
             key_exclusion_enabled = !key_exclusion_enabled;
@@ -57,7 +79,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┐       ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
      KC_LSFT ,KC_Z    ,KC_X    ,KC_C    ,KC_D    ,KC_V    ,MO(_EXT2),XXXXXXX,        XXXXXXX,MO(_EXT2), KC_M   ,KC_H    ,KC_COMM ,KC_DOT  ,KC_SLSH ,KC_RSFT ,
   //├────────┼────────┼────────┼────────┼────┬───┴────┬───┼────────┼────────┤       ├────────┼────────┼───┬────┴───┬────┼────────┼────────┼────────┼────────┤
-     KC_LCTL ,KC_LGUI ,KC_LBRC ,KC_RBRC ,     KC_LALT ,    KC_SPC  ,KC_LCTL ,        KC_RCTL ,KC_ENT ,    KC_QUOT ,     KC_UP   ,KC_LEFT   ,KC_DOWN ,KC_RGHT 
+     KC_LCTL ,KC_LGUI ,KC_LBRC ,KC_RBRC ,     KC_LALT ,    KC_SPC  ,KC_LCTL ,        MO(_EXT2),KC_ENT ,    KC_QUOT ,     KC_UP   ,KC_LEFT   ,KC_DOWN ,KC_RGHT 
   //└────────┴────────┴────────┴────────┘    └────────┘   └────────┴────────┘       └────────┴────────┘   └────────┘    └────────┴────────┴────────┴────────┘
   ),
 
@@ -77,15 +99,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_EXT2] = LAYOUT(
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                                           ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     XXXXXXX ,KC_F13  ,KC_F14  ,KC_F15  ,KC_F16  ,KC_F17  ,                                            KC_F18  ,KC_F19  ,KC_F20  ,KC_F21  ,KC_F22  ,XXXXXXX ,
+     BOOT_2S ,KC_F13  ,KC_F14  ,KC_F15  ,KC_F16  ,KC_F17  ,                                            KC_F18  ,KC_F19  ,KC_F20  ,KC_F21  ,KC_F22  ,BOOT_2S ,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐                         ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KC_F23  ,                          KC_F24  ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX  ,
+     XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KC_F23  ,                          KC_F24  ,KC_WH_U ,KC_WH_D ,KC_MS_U ,XXXXXXX ,XXXXXXX ,XXXXXXX ,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┤                         ├────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     _______ ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KXTG    ,XXXXXXX ,XXXXXXX ,                          XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,_______,
+     _______ ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KXTG    ,XXXXXXX ,XXXXXXX ,                          XXXXXXX ,KC_BTN1 ,KC_MS_L ,KC_MS_D ,KC_MS_R ,KC_BTN2 ,_______,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┐       ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_LSFT ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,_______ , XXXXXXX,        XXXXXXX ,_______ ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KC_RSFT ,
+     KC_LSFT ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,_______ ,XXXXXXX ,        XXXXXXX ,_______ ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,XXXXXXX ,KC_RSFT ,
   //├────────┼────────┼────────┼────────┼────┬───┴────┬───┼────────┼────────┤       ├────────┼────────┼───┬────┴───┬────┼────────┼────────┼────────┼────────┤
-     QK_BOOT ,XXXXXXX ,XXXXXXX ,XXXXXXX ,     XXXXXXX ,    XXXXXXX ,XXXXXXX ,        XXXXXXX ,XXXXXXX,     XXXXXXX ,     XXXXXXX ,XXXXXXX ,XXXXXXX ,QK_BOOT 
+     _______ ,XXXXXXX ,XXXXXXX ,XXXXXXX ,     XXXXXXX ,    XXXXXXX ,XXXXXXX ,        _______ ,_______ ,     XXXXXXX ,     XXXXXXX ,XXXXXXX ,XXXXXXX ,_______
   //└────────┴────────┴────────┴────────┘    └────────┘   └────────┴────────┘       └────────┴────────┘   └────────┘    └────────┴────────┴────────┴────────┘
   )
 };
